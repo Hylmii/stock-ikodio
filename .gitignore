@@ -150,5 +150,5 @@ temp/
 # Build outputs
 build/
 dist/
-lib/
+# lib/ - REMOVED: This is our source code folder, not build output!
 .vercel
