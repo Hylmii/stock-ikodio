@@ -10,7 +10,7 @@ export const getAuth = async () => {
 
   authInstance = betterAuth({
     database: prismaAdapter(prisma, {
-      provider: "sqlite",
+      provider: "postgresql",
     }),
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
