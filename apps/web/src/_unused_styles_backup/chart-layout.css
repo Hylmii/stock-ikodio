@@ -1,0 +1,143 @@
+/* Layout optimization untuk chart area */
+/* Mencegah konten mengumpul di kiri saat zoom out */
+
+@layer components {
+  /* Main layout container */
+  .chart-layout-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #0A0A0A;
+    margin: 0 auto;
+    max-width: 100vw;
+  }
+
+  /* Chart area - flexible and responsive */
+  .chart-main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    min-width: 0; /* Prevents flex item from overflowing */
+    position: relative;
+  }
+
+  /* Stock info panel - fixed width with responsive breakpoints */
+  .stock-info-panel {
+    width: 100%;
+    max-width: 400px;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: #0A0A0A;
+    overflow-y: auto;
+  }
+
+  /* Responsive breakpoints */
+  @media (min-width: 640px) {
+    .stock-info-panel {
+      width: 20rem; /* 320px */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .stock-info-panel {
+      width: 20rem; /* 320px */
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .stock-info-panel {
+      width: 24rem; /* 384px */
+    }
+  }
+
+  /* Chart container optimization */
+  .chart-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: #0A0A0A;
+    position: relative;
+    min-height: 400px;
+  }
+
+  /* Prevent content from shrinking too much on zoom out */
+  @media (min-width: 1536px) {
+    .chart-layout-container {
+      max-width: 1920px;
+      margin: 0 auto;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .chart-layout-container {
+      max-width: 2560px;
+      margin: 0 auto;
+    }
+  }
+
+  /* Center content on ultra-wide screens */
+  @media (min-width: 2560px) {
+    .chart-layout-container {
+      max-width: 3200px;
+      margin: 0 auto;
+    }
+  }
+}
+
+/* Zoom out optimization */
+@media (max-zoom: 0.8) {
+  .chart-layout-container {
+    transform-origin: center center;
+  }
+}
+
+/* Ensure proper scaling on zoom */
+.chart-layout-container {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Smooth transitions for responsive changes */
+.chart-main-area,
+.stock-info-panel {
+  transition: width 0.3s ease, max-width 0.3s ease;
+}
+
+/* Grid alignment for footer elements */
+.ai-footer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 640px) {
+  .ai-footer-grid {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* Prevent text from overflowing in compact spaces */
+.chart-header,
+.chart-controls,
+.ai-footer {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .chart-header,
+  .chart-controls,
+  .ai-footer {
+    white-space: normal;
+  }
+}

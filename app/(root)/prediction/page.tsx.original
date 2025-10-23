@@ -1,0 +1,643 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import {
+  Sparkles,
+  Loader2,
+  AlertCircle,
+  Info,
+  TrendingUp,
+  LineChart,
+  BarChart3,
+  Activity,
+  Zap,
+  Target,
+  Clock,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { StockSelector } from "@/components/prediction/stock-selector";
+import { IntervalSelector } from "@/components/prediction/interval-selector";
+import { PredictionChart } from "@/components/prediction/prediction-chart";
+import { MetricsDisplay } from "@/components/prediction/metrics-display";
+import { getCurrencySymbol } from "@/lib/utils/currency";
+import { useI18n } from "@/lib/i18n/I18nContext";
+import { MarketStatusBadge } from "@/components/market-status-badge";
+import { MultiTimezoneDisplay } from "@/components/multi-timezone-display";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type {
+  StockOption,
+  PredictionInterval,
+  PredictionResult,
+  HistoricalDataPoint,
+} from "@/types/prediction";
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function PredictionPage() {
+  const { t, language } = useI18n();
+  const [, forceUpdate] = useState({});
+  const [selectedStock, setSelectedStock] = useState<StockOption | null>(null);
+  const [selectedInterval, setSelectedInterval] =
+    useState<PredictionInterval>("1d");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [predictionResult, setPredictionResult] =
+    useState<PredictionResult | null>(null);
+  const [historicalData, setHistoricalData] = useState<HistoricalDataPoint[]>(
+    []
+  );
+
+  // Refs for GSAP animations
+  const heroRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  // Scroll animations
+  const { scrollYProgress } = useScroll();
+  const headerY = useTransform(scrollYProgress, [0, 0.3], [0, -50]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.5]);
+
+  // Re-render when language changes
+  useEffect(() => {
+    const handleLanguageChange = () => forceUpdate({});
+    window.addEventListener("languageChange", handleLanguageChange);
+    return () =>
+      window.removeEventListener("languageChange", handleLanguageChange);
+  }, []);
+
+  // Initial page load animation
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero section stagger animation
+      gsap.from(heroRef.current, {
+        opacity: 0,
+        scale: 0.95,
+        duration: 1,
+        ease: "power3.out",
+      });
+
+      gsap.from(headerRef.current?.children || [], {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: "power3.out",
+        delay: 0.3,
+      });
+
+      gsap.from(controlsRef.current?.children || [], {
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "back.out(1.4)",
+        delay: 0.6,
+      });
+
+      // Floating animation for stats
+      if (statsRef.current) {
+        gsap.to(statsRef.current, {
+          y: -10,
+          duration: 2,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      }
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  // Results animation - simplified to not hide content
+  useEffect(() => {
+    if (predictionResult && resultsRef.current) {
+      console.log("🎬 Animating results for:", predictionResult.symbol);
+
+      const ctx = gsap.context(() => {
+        gsap.from(resultsRef.current, {
+          opacity: 0,
+          y: 30,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+
+        const cards =
+          resultsRef.current?.querySelectorAll(".result-card") || [];
+        console.log("📦 Found result cards:", cards.length);
+
+        gsap.from(cards, {
+          opacity: 0,
+          y: 20,
+          duration: 0.4,
+          stagger: 0.1,
+          ease: "power2.out",
+        });
+      });
+
+      return () => ctx.revert();
+    }
+  }, [predictionResult]);
+
+  const handleGeneratePrediction = async () => {
+    if (!selectedStock) {
+      setError("Please select a stock first");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setPredictionResult(null);
+
+    try {
+      console.log(
+        `Generating prediction for ${selectedStock.symbol} at ${selectedInterval}`
+      );
+
+      // Call prediction API directly - it will fetch historical data internally
+      const response = await fetch("/api/prediction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          symbol: selectedStock.symbol,
+          interval: selectedInterval,
+          periods: 10, // predict next 10 periods
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        // Auto-fallback to daily data if intraday fails
+        if (
+          errorData.error?.includes("No historical data") &&
+          ["1m", "5m", "10m", "30m", "1h"].includes(selectedInterval)
+        ) {
+          console.log(
+            "Intraday data not available, falling back to daily data..."
+          );
+          setSelectedInterval("1d");
+          setError(
+            'Intraday data not available for this stock. Switched to daily interval. Please click "Generate Prediction" again.'
+          );
+          return;
+        }
+
+        throw new Error(errorData.error || "Failed to generate prediction");
+      }
+
+      const data = await response.json();
+
+      if (!data.success || !data.data) {
+        throw new Error(data.error || "Prediction failed");
+      }
+
+      console.log("✅ Prediction Result:", {
+        symbol: data.data.symbol,
+        signal: data.data.signal?.signal,
+        hasMetrics: !!data.data.metrics,
+        hasPredictions: !!data.data.predictions,
+        hasHistoricalData: !!data.data.historicalData,
+      });
+
+      setPredictionResult(data.data);
+      setHistoricalData(data.data.historicalData || []);
+      console.log("Prediction generated successfully:", data.data.signal);
+    } catch (err) {
+      console.error("Prediction error:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to generate prediction"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white relative overflow-hidden">
+      {/* Animated background gradients - matching landing page */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-cyan-600/5 rounded-full blur-3xl"
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+      </div>
+
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black,transparent)]" />
+
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Hero Section */}
+        <motion.div
+          ref={heroRef}
+          className="pt-20 pb-12 text-center"
+          style={{ y: headerY, opacity: headerOpacity }}
+        >
+          <div ref={headerRef} className="space-y-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 backdrop-blur-sm"
+            >
+              <Sparkles className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-medium bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                AI-Powered Predictions
+              </span>
+            </motion.div>
+
+            <h1 className="text-5xl md:text-7xl font-bold">
+              <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                {t("prediction.title")}
+              </span>
+            </h1>
+
+            <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              {t("prediction.subtitle")}
+            </p>
+
+            {/* Stats badges */}
+            <div
+              ref={statsRef}
+              className="flex items-center justify-center gap-6 mt-8"
+            >
+              <motion.div
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm"
+                whileHover={{
+                  scale: 1.05,
+                  borderColor: "rgba(59, 130, 246, 0.5)",
+                }}
+              >
+                <LineChart className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-medium">Real-time Data</span>
+              </motion.div>
+              <motion.div
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm"
+                whileHover={{
+                  scale: 1.05,
+                  borderColor: "rgba(168, 85, 247, 0.5)",
+                }}
+              >
+                <Zap className="w-4 h-4 text-purple-400" />
+                <span className="text-sm font-medium">LSTM Model</span>
+              </motion.div>
+              <motion.div
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm"
+                whileHover={{
+                  scale: 1.05,
+                  borderColor: "rgba(34, 197, 94, 0.5)",
+                }}
+              >
+                <Target className="w-4 h-4 text-green-400" />
+                <span className="text-sm font-medium">High Accuracy</span>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* World Markets Time Display */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <MultiTimezoneDisplay className="mb-8" />
+        </motion.div>
+
+        {/* Disclaimer */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+        >
+          <Alert className="mb-8 bg-gradient-to-r from-yellow-900/10 to-orange-900/10 border border-yellow-700/30 rounded-2xl backdrop-blur-sm">
+            <Info className="h-4 w-4 text-yellow-400" />
+            <AlertDescription className="text-zinc-300">
+              <strong className="text-yellow-400">
+                {t("prediction.disclaimer")}
+              </strong>{" "}
+              {t("prediction.disclaimerText")}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+
+        {/* Controls */}
+        <div ref={controlsRef} className="mb-12">
+          <motion.div
+            className="bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/50 rounded-3xl p-8 backdrop-blur-xl shadow-2xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div
+                className="space-y-3"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <label className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+                  <BarChart3 className="w-4 h-4 text-blue-400" />
+                  {t("prediction.selectStock")}
+                </label>
+                <StockSelector
+                  value={selectedStock?.symbol || ""}
+                  onChange={setSelectedStock}
+                  disabled={isLoading}
+                />
+              </motion.div>
+
+              <motion.div
+                className="space-y-3"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <label className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+                  <Clock className="w-4 h-4 text-purple-400" />
+                  {t("prediction.predictionInterval")}
+                </label>
+                <IntervalSelector
+                  value={selectedInterval}
+                  onChange={setSelectedInterval}
+                  disabled={isLoading}
+                />
+              </motion.div>
+
+              <motion.div
+                className="space-y-3"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <label className="text-sm font-medium text-zinc-300 opacity-0 select-none">
+                  Action
+                </label>
+                <Button
+                  onClick={handleGeneratePrediction}
+                  disabled={isLoading || !selectedStock}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold h-12 transition-all duration-300 rounded-xl shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity"
+                    animate={{
+                      x: ["-100%", "100%"],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      {t("prediction.generating")}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      {t("prediction.generatePrediction")}
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+          >
+            <Alert className="mb-8 bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-700/40 rounded-2xl backdrop-blur-sm">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+              <AlertDescription className="text-red-200 font-medium">
+                {error}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <motion.div
+            className="flex items-center justify-center py-32"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="text-center space-y-6">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <div className="relative">
+                  <Loader2 className="h-16 w-16 text-blue-500 mx-auto" />
+                  <motion.div
+                    className="absolute inset-0 rounded-full border-4 border-blue-500/20"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </div>
+              </motion.div>
+              <div className="space-y-2">
+                <p className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  {t("prediction.analyzing")}
+                </p>
+                <p className="text-sm text-zinc-500">
+                  Processing market data with AI...
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Results */}
+        {!isLoading && predictionResult && historicalData.length > 0 && (
+          <div ref={resultsRef} className="space-y-8 pb-20">
+            {/* Market Status - ALWAYS VISIBLE WITH BRIGHT BORDER */}
+            <div className="result-card w-full">
+              <div className="border-4 border-green-500/80 rounded-2xl p-1">
+                <MarketStatusBadge
+                  symbol={predictionResult.symbol}
+                  showCountdown={true}
+                />
+              </div>
+            </div>
+
+            {/* Metrics & Signal - ULTRA PROMINENT DISPLAY */}
+            <div className="result-card w-full">
+              <div className="bg-gradient-to-br from-purple-900/60 to-pink-900/60 border-4 border-purple-400 rounded-3xl p-8 backdrop-blur-xl shadow-2xl shadow-purple-500/50">
+                <div className="mb-6 p-4 bg-purple-500/20 rounded-xl border border-purple-400/50">
+                  <h2 className="text-3xl font-bold flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600/50 to-pink-600/50 border-2 border-purple-300">
+                      <TrendingUp className="h-8 w-8 text-purple-100" />
+                    </div>
+                    <span className="text-white drop-shadow-lg">
+                      Analysis & Trading Signal
+                    </span>
+                  </h2>
+                </div>
+                <MetricsDisplay
+                  metrics={predictionResult.metrics}
+                  signal={predictionResult.signal}
+                  predictedChange={predictionResult.predictedChange}
+                  predictionResult={predictionResult}
+                />
+              </div>
+            </div>
+
+            {/* Chart */}
+            <div className="result-card w-full bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/50 rounded-3xl p-8 backdrop-blur-xl shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30">
+                  <Activity className="h-6 w-6 text-blue-400" />
+                </div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+                  {t("prediction.priceChart")}
+                </h2>
+              </div>
+
+              <div className="bg-black/30 rounded-2xl p-6 border border-zinc-800/50">
+                <PredictionChart
+                  historicalData={historicalData}
+                  predictions={predictionResult.predictions}
+                  symbol={predictionResult.symbol}
+                  currentPrice={predictionResult.currentPrice}
+                  interval={selectedInterval}
+                />
+              </div>
+
+              <div className="mt-6 flex items-start gap-3 bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
+                <Info className="h-5 w-5 flex-shrink-0 text-blue-400 mt-0.5" />
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  {t("prediction.chartInfo")}
+                </p>
+              </div>
+            </div>
+
+            {/* Model Info */}
+            <div className="result-card bg-gradient-to-br from-zinc-900/50 to-zinc-800/30 border border-zinc-700/50 rounded-3xl p-8 backdrop-blur-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-600/20 to-blue-600/20 border border-cyan-500/30">
+                  <Zap className="h-6 w-6 text-cyan-400" />
+                </div>
+                <h3 className="text-xl font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent">
+                  {t("prediction.modelInfo")}
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 border border-zinc-700/50 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-300">
+                  <span className="text-sm text-zinc-500 block mb-2">
+                    {t("prediction.model")}
+                  </span>
+                  <p className="text-lg font-bold text-white">
+                    {predictionResult.modelUsed}
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 border border-zinc-700/50 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300">
+                  <span className="text-sm text-zinc-500 block mb-2">
+                    {t("prediction.interval")}
+                  </span>
+                  <p className="text-lg font-bold text-white">
+                    {predictionResult.interval}
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 border border-zinc-700/50 rounded-2xl p-6 hover:border-cyan-500/50 transition-all duration-300">
+                  <span className="text-sm text-zinc-500 block mb-2">
+                    {t("prediction.predictionTime")}
+                  </span>
+                  <p className="text-lg font-bold text-white">
+                    {new Date(predictionResult.timestamp).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !predictionResult && !error && (
+          <motion.div
+            className="flex flex-col items-center justify-center py-32 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+          >
+            <motion.div
+              animate={{
+                y: [0, -10, 0],
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <div className="relative mb-8">
+                <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-blue-500/20 backdrop-blur-sm">
+                  <Sparkles className="h-20 w-20 text-blue-400" />
+                </div>
+                <motion.div
+                  className="absolute inset-0 rounded-3xl border-2 border-blue-500/30"
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </div>
+            </motion.div>
+
+            <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+              {t("prediction.readyToPredict")}
+            </h3>
+            <p className="text-zinc-500 max-w-md text-lg leading-relaxed">
+              {t("prediction.readyDescription")}
+            </p>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+}

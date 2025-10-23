@@ -1,0 +1,9 @@
+{
+  "extends": "@project-ikodiomain/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["index.ts", "prisma/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

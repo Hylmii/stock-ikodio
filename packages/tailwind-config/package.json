@@ -1,0 +1,10 @@
+{
+  "name": "@project-ikodiomain/tailwind-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "index.js",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

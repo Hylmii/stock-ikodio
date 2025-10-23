@@ -1,0 +1,9 @@
+{
+  "extends": "@project-ikodiomain/typescript-config/react-native.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*", "index.js"],
+  "exclude": ["node_modules", "android", "ios"]
+}

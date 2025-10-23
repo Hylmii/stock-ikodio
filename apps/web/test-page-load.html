@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test localStorage</title></head>
+<body>
+<h1>Testing localStorage</h1>
+<script>
+  // Clear all ikodio keys
+  localStorage.removeItem("ikodio_auth");
+  localStorage.removeItem("ikodio_email");
+  localStorage.removeItem("ikodio_kyc_completed");
+  localStorage.removeItem("ikodio_has_visited");
+  console.log("Cleared all localStorage");
+  alert("localStorage cleared! Now reload http://localhost:3000");
+</script>
+</body>
+</html>
