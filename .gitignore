@@ -152,3 +152,4 @@ build/
 dist/
 # lib/ - REMOVED: This is our source code folder, not build output!
 .vercel
+ssh-tunnel.sh
