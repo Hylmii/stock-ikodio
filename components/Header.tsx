@@ -72,13 +72,13 @@ const Header = ({ user }: { user: User | null }) => {
       // Import signOut dynamically to avoid client-side errors
       const { signOut } = await import("@/lib/better-auth/client");
       await signOut();
-      
+
       // Clear any remaining localStorage
       localStorage.removeItem("ikodio_auth");
       localStorage.removeItem("ikodio_email");
       localStorage.removeItem("ikodio_kyc_completed");
       localStorage.removeItem("ikodio_has_visited");
-      
+
       // Redirect to home
       router.push("/");
       router.refresh();

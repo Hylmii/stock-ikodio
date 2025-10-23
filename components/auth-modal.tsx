@@ -96,16 +96,20 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           name: formData.name,
         });
 
+        console.log("Sign up result:", result);
+
         if (result.error) {
           setError(result.error.message || "Sign up failed");
           setIsLoading(false);
           return;
         }
 
-        // Success - redirect to dashboard
-        onSuccess(formData.email, true);
+        // Success - close modal and redirect
         onClose();
-        router.push("/dashboard");
+        onSuccess(formData.email, true);
+
+        // Use window.location for hard reload to refresh session
+        window.location.href = "/dashboard";
       } else {
         // Sign in with Better Auth
         const result = await signIn.email({
@@ -113,16 +117,20 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           password: formData.password,
         });
 
+        console.log("Sign in result:", result);
+
         if (result.error) {
           setError(result.error.message || "Invalid email or password");
           setIsLoading(false);
           return;
         }
 
-        // Success - redirect to dashboard
-        onSuccess(formData.email, false);
+        // Success - close modal and redirect
         onClose();
-        router.push("/dashboard");
+        onSuccess(formData.email, false);
+
+        // Use window.location for hard reload to refresh session
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       console.error("Auth error:", err);
@@ -281,7 +289,11 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      <span>{mode === "login" ? "Signing in..." : "Creating account..."}</span>
+                      <span>
+                        {mode === "login"
+                          ? "Signing in..."
+                          : "Creating account..."}
+                      </span>
                     </>
                   ) : (
                     <>
