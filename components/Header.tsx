@@ -67,12 +67,26 @@ const Header = ({ user }: { user: User | null }) => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("ikodio_auth");
-    localStorage.removeItem("ikodio_email");
-    localStorage.removeItem("ikodio_kyc_completed");
-    localStorage.removeItem("ikodio_has_visited");
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      // Import signOut dynamically to avoid client-side errors
+      const { signOut } = await import("@/lib/better-auth/client");
+      await signOut();
+      
+      // Clear any remaining localStorage
+      localStorage.removeItem("ikodio_auth");
+      localStorage.removeItem("ikodio_email");
+      localStorage.removeItem("ikodio_kyc_completed");
+      localStorage.removeItem("ikodio_has_visited");
+      
+      // Redirect to home
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback: just redirect
+      window.location.href = "/";
+    }
   };
 
   const handleProfile = () => {
