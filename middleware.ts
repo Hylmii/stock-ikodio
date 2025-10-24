@@ -4,20 +4,27 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Debug: Log all cookies
-  if (process.env.NODE_ENV === "development" || pathname.startsWith("/dashboard")) {
+  if (
+    process.env.NODE_ENV === "development" ||
+    pathname.startsWith("/dashboard")
+  ) {
     console.log("[Middleware] Path:", pathname);
     console.log("[Middleware] All cookies:", request.cookies.getAll());
   }
 
   // Check for better-auth session token in cookies
-  // Better Auth uses multiple possible cookie names, check all of them
+  // Better Auth in production (HTTPS) uses __Secure- prefix
   const sessionToken =
+    request.cookies.get("__Secure-better-auth.session_token")?.value ||
     request.cookies.get("better-auth.session_token")?.value ||
     request.cookies.get("session_token")?.value ||
     request.cookies.get("better_auth_session")?.value ||
     request.cookies.get("auth_session")?.value;
 
-  if (process.env.NODE_ENV === "development" || pathname.startsWith("/dashboard")) {
+  if (
+    process.env.NODE_ENV === "development" ||
+    pathname.startsWith("/dashboard")
+  ) {
     console.log("[Middleware] Session token found:", !!sessionToken);
   }
 
