@@ -104,12 +104,17 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           return;
         }
 
-        // Success - close modal and redirect
+        // Check if we got session data back
+        console.log("Sign up data:", result.data);
+
+        // Success - close modal
         onClose();
         onSuccess(formData.email, true);
 
-        // Use window.location for hard reload to refresh session
-        window.location.href = "/dashboard";
+        // Wait a bit for cookie to be set, then redirect with router
+        await new Promise(resolve => setTimeout(resolve, 500));
+        router.push("/dashboard");
+        router.refresh();
       } else {
         // Sign in with Better Auth
         const result = await signIn.email({
@@ -125,12 +130,17 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           return;
         }
 
-        // Success - close modal and redirect
+        // Check if we got session data back
+        console.log("Sign in data:", result.data);
+
+        // Success - close modal
         onClose();
         onSuccess(formData.email, false);
 
-        // Use window.location for hard reload to refresh session
-        window.location.href = "/dashboard";
+        // Wait a bit for cookie to be set, then redirect with router
+        await new Promise(resolve => setTimeout(resolve, 500));
+        router.push("/dashboard");
+        router.refresh();
       }
     } catch (err: any) {
       console.error("Auth error:", err);

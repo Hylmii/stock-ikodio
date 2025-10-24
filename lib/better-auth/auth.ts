@@ -14,6 +14,11 @@ export const getAuth = async () => {
     }),
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
+    trustedOrigins: [
+      process.env.BETTER_AUTH_URL || "",
+      "https://ikodio.com",
+      "http://localhost:3001",
+    ],
     emailAndPassword: {
       enabled: true,
       disableSignUp: false,
@@ -21,6 +26,12 @@ export const getAuth = async () => {
       minPasswordLength: 8,
       maxPasswordLength: 128,
       autoSignIn: true,
+    },
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 5 * 60, // Cache for 5 minutes
+      },
     },
     plugins: [nextCookies()],
   });
