@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, LogOut, User as UserIcon } from "lucide-react";
+import { Search, LogOut, User as UserIcon, Menu, X } from "lucide-react";
 import { searchStocks } from "@/lib/actions/finnhub.actions";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useI18n } from "@/lib/i18n/I18nContext";
@@ -31,6 +31,7 @@ const Header = ({ user }: { user: User | null }) => {
   const { t, language } = useI18n();
   const [, forceUpdate] = useState({});
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<
     StockWithWatchlistStatus[]
@@ -108,7 +109,7 @@ const Header = ({ user }: { user: User | null }) => {
             </span>
           </Link>
 
-          {/* Navigation */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
               href="/dashboard"
@@ -133,21 +134,37 @@ const Header = ({ user }: { user: User | null }) => {
 
           {/* Right Side - Search & User */}
           <div className="flex items-center gap-4">
-            {/* Live Clock */}
+            {/* Live Clock - Desktop Only */}
             <LiveClock className="hidden md:flex" />
 
-            {/* Quick Search Button */}
+            {/* Quick Search Button - Desktop */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSearchOpen(true)}
-              className="text-gray-400 hover:text-white hover:bg-white/10"
+              className="hidden md:flex text-gray-400 hover:text-white hover:bg-white/10"
             >
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Language Selector */}
-            <LanguageSelector />
+            {/* Language Selector - Desktop Only */}
+            <div className="hidden md:block">
+              <LanguageSelector />
+            </div>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-gray-400 hover:text-white hover:bg-white/10"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
 
             {/* User Dropdown */}
             {user ? (
@@ -217,6 +234,41 @@ const Header = ({ user }: { user: User | null }) => {
             )}
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/[0.08] bg-[#0A0A0A]">
+            <nav className="container px-6 py-4 flex flex-col gap-4">
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-medium text-gray-400 hover:text-white transition-colors py-2"
+              >
+                {t("header.dashboard")}
+              </Link>
+              <button
+                onClick={() => {
+                  setSearchOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-base font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-2 py-2"
+              >
+                <Search className="w-5 h-5" />
+                {t("header.search")}
+              </button>
+              <Link
+                href="/prediction"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-base font-medium text-gray-400 hover:text-white transition-colors py-2"
+              >
+                {t("header.prediction")}
+              </Link>
+              <div className="pt-2 border-t border-white/[0.08]">
+                <LanguageSelector />
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Search Dialog */}
