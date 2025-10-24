@@ -3,7 +3,11 @@ import { auth } from "./auth";
 
 export async function getSession() {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("better-auth.session_token");
+
+  // In production (HTTPS), Better Auth uses __Secure- prefix
+  const sessionToken =
+    cookieStore.get("__Secure-better-auth.session_token") ||
+    cookieStore.get("better-auth.session_token");
 
   if (!sessionToken) {
     return null;
@@ -13,7 +17,8 @@ export async function getSession() {
     // Use Better Auth to verify and get session
     const session = await auth.api.getSession({
       headers: {
-        cookie: `better-auth.session_token=${sessionToken.value}`,
+        // Use the actual cookie name that was found
+        cookie: `${sessionToken.name}=${sessionToken.value}`,
       },
     });
 
@@ -26,7 +31,7 @@ export async function getSession() {
 
 export async function getCurrentUser() {
   const session = await getSession();
-  
+
   if (!session?.user) {
     return null;
   }
