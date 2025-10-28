@@ -22,7 +22,18 @@ export const getAuth = async () => {
       "https://ikodio.com",
       "https://www.ikodio.com",
       "http://localhost:3001",
+      "http://localhost:3000",
     ],
+    cors: {
+      enabled: true,
+      allowedOrigins: [
+        "https://ikodio.com",
+        "https://www.ikodio.com",
+        "http://localhost:3001",
+        "http://localhost:3000",
+      ],
+      credentials: true,
+    },
     emailAndPassword: {
       enabled: true,
       disableSignUp: false,
@@ -45,7 +56,7 @@ export const getAuth = async () => {
         secure: isProduction,
         httpOnly: true,
         path: "/",
-        domain: isProduction ? "ikodio.com" : undefined,
+        domain: isProduction ? ".ikodio.com" : undefined, // Use .ikodio.com to include www subdomain
       },
     },
     plugins: [nextCookies()],
