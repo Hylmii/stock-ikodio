@@ -15,7 +15,7 @@ const footerLinks = {
     { name: "About", href: "#about" },
     { name: "Blog", href: "#blog" },
     { name: "Careers", href: "#careers" },
-    { name: "Contact", href: "#contact" },
+    { name: "Contact", href: "/contact-us" },
   ],
   resources: [
     { name: "Documentation", href: "#docs" },
@@ -24,18 +24,18 @@ const footerLinks = {
     { name: "Status", href: "#status" },
   ],
   legal: [
-    { name: "Privacy", href: "#privacy" },
-    { name: "Terms", href: "#terms" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "Terms & Conditions", href: "/terms-and-conditions" },
     { name: "Cookie Policy", href: "#cookies" },
-    { name: "Licenses", href: "#licenses" },
+    { name: "Contact Us", href: "/contact-us" },
   ],
 };
 
 const socialLinks = [
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Github, href: "https://github.com", label: "GitHub" },
-  { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-  { icon: Mail, href: "mailto:hello@ikodiomain.com", label: "Email" },
+  { icon: Twitter, href: "https://twitter.com/ikodio", label: "Twitter" },
+  { icon: Github, href: "https://github.com/ikodio", label: "GitHub" },
+  { icon: Linkedin, href: "https://linkedin.com/company/ikodio", label: "LinkedIn" },
+  { icon: Mail, href: "mailto:info@ikodio.com", label: "Email" },
 ];
 
 export function Footer() {
@@ -142,16 +142,22 @@ export function Footer() {
             </p>
             <div className="flex gap-6 text-sm text-zinc-500">
               <Link
-                href="#privacy"
+                href="/privacy-policy"
                 className="hover:text-white transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="#terms"
+                href="/terms-and-conditions"
                 className="hover:text-white transition-colors"
               >
-                Terms of Service
+                Terms & Conditions
+              </Link>
+              <Link
+                href="/contact-us"
+                className="hover:text-white transition-colors"
+              >
+                Contact Us
               </Link>
             </div>
           </div>
