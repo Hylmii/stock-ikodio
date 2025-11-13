@@ -14,7 +14,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/assets") ||
     pathname.startsWith("/icons") ||
-    pathname.startsWith("/images");
+    pathname.startsWith("/images") ||
+    pathname.startsWith("/privacy-policy") ||
+    pathname.startsWith("/terms-and-conditions") ||
+    pathname.startsWith("/contact-us");
 
   // Protected routes that absolutely need auth
   const isProtectedRoute =
