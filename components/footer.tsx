@@ -34,7 +34,11 @@ const footerLinks = {
 const socialLinks = [
   { icon: Twitter, href: "https://twitter.com/ikodio", label: "Twitter" },
   { icon: Github, href: "https://github.com/ikodio", label: "GitHub" },
-  { icon: Linkedin, href: "https://linkedin.com/company/ikodio", label: "LinkedIn" },
+  {
+    icon: Linkedin,
+    href: "https://linkedin.com/company/ikodio",
+    label: "LinkedIn",
+  },
   { icon: Mail, href: "mailto:info@ikodio.com", label: "Email" },
 ];
 

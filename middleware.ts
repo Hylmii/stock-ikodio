@@ -1,52 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Check for better-auth session token in cookies
+  const sessionToken = request.cookies.get("better-auth.session_token");
   const { pathname } = request.nextUrl;
 
-  // Handle CORS for API routes
-  if (pathname.startsWith("/api")) {
-    const response = NextResponse.next();
-
-    // Add CORS headers
-    response.headers.set("Access-Control-Allow-Origin", "*");
-    response.headers.set(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    response.headers.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, Cookie, Set-Cookie, X-Requested-With"
-    );
-    response.headers.set("Access-Control-Allow-Credentials", "true");
-
-    // Handle preflight OPTIONS request
-    if (request.method === "OPTIONS") {
-      return new NextResponse(null, {
-        status: 204,
-        headers: response.headers,
-      });
-    }
-
-    return response;
-  }
-
-  // Skip middleware for static files
-  if (
+  // Public routes that don't need authentication
+  const isPublicRoute =
+    pathname === "/" ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/assets") ||
     pathname.startsWith("/icons") ||
-    pathname.startsWith("/images") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next();
+    pathname.startsWith("/images");
+
+  // Protected routes that absolutely need auth
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/prediction") ||
+    pathname.startsWith("/stocks");
+
+  // If user is not authenticated and trying to access protected route
+  if (!sessionToken && isProtectedRoute) {
+    // Redirect to home/landing page
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Let the layout handle authentication
-  // Middleware only handles simple routing logic
+  // If user is authenticated and trying to access auth pages, redirect to dashboard
+  if (
+    sessionToken &&
+    (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up"))
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|assets).*)"],
 };

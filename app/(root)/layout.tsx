@@ -1,14 +1,25 @@
 import Header from "@/components/Header";
-import { getCurrentUser } from "@/lib/better-auth/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  // Check Better Auth session
-  const user = await getCurrentUser();
+  // Check for session cookie instead of better-auth
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("better-auth.session_token");
 
-  if (!user) {
+  if (!sessionCookie) {
     redirect("/");
   }
+
+  // Extract email from cookie (format: ikodio_{email}_{timestamp})
+  const cookieValue = sessionCookie.value;
+  const email = cookieValue.split("_")[1] || "user@example.com";
+
+  const user = {
+    id: "1",
+    email: email,
+    name: email.split("@")[0],
+  };
 
   return (
     <main className="min-h-screen text-gray-400">

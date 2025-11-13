@@ -4,8 +4,6 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { gsap } from "gsap";
-import { signIn, signUp } from "@/lib/better-auth/client";
-import { useRouter } from "next/navigation";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,11 +12,8 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
-  const router = useRouter();
   const [mode, setMode] = React.useState<"login" | "signup">("login");
   const [showPassword, setShowPassword] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -62,81 +57,29 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     return () => ctx.revert();
   }, [isOpen, mode]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
-    try {
-      // Validation
-      if (!formData.email || !formData.password) {
-        setError("Please fill in all fields");
-        setIsLoading(false);
-        return;
-      }
-
-      if (mode === "signup" && !formData.name) {
-        setError("Please enter your name");
-        setIsLoading(false);
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        setError("Please enter a valid email address");
-        setIsLoading(false);
-        return;
-      }
-
-      if (mode === "signup") {
-        // Sign up with Better Auth
-        const result = await signUp.email({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-        });
-
-        console.log("Sign up result:", result);
-
-        if (result.error) {
-          setError(result.error.message || "Sign up failed");
-          setIsLoading(false);
-          return;
-        }
-
-        // Check if we got session data back
-        console.log("Sign up data:", result.data);
-
-        // Success - use window.location for hard redirect to ensure cookie is loaded
-        // This prevents race condition with middleware
-        window.location.href = "/dashboard";
-      } else {
-        // Sign in with Better Auth
-        const result = await signIn.email({
-          email: formData.email,
-          password: formData.password,
-        });
-
-        console.log("Sign in result:", result);
-
-        if (result.error) {
-          setError(result.error.message || "Invalid email or password");
-          setIsLoading(false);
-          return;
-        }
-
-        // Check if we got session data back
-        console.log("Sign in data:", result.data);
-
-        // Success - use window.location for hard redirect to ensure cookie is loaded
-        // This prevents race condition with middleware
-        window.location.href = "/dashboard";
-      }
-    } catch (err: any) {
-      console.error("Auth error:", err);
-      setError(err?.message || "Authentication failed. Please try again.");
-      setIsLoading(false);
+    if (!formData.email || !formData.password) {
+      alert("Please fill in all fields");
+      return;
     }
+
+    if (mode === "signup" && !formData.name) {
+      alert("Please enter your name");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    const isNewUser = mode === "signup";
+    setTimeout(() => {
+      onSuccess(formData.email, isNewUser);
+    }, 500);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,17 +132,6 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
               </div>
 
               <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-                {/* Error Message */}
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-
                 {mode === "signup" && (
                   <div className="input-group">
                     <label className="block text-sm font-medium text-zinc-400 mb-1.5">
@@ -281,26 +213,12 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 {/* Submit Button */}
                 <motion.button
                   type="submit"
-                  disabled={isLoading}
-                  className="submit-btn w-full py-4 rounded-lg bg-white text-black font-semibold text-base hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 group shadow-lg mt-6 opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={!isLoading ? { scale: 1.02 } : {}}
-                  whileTap={!isLoading ? { scale: 0.98 } : {}}
+                  className="submit-btn w-full py-4 rounded-lg bg-white text-black font-semibold text-base hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 group shadow-lg mt-6 opacity-100"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  {isLoading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      <span>
-                        {mode === "login"
-                          ? "Signing in..."
-                          : "Creating account..."}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      {mode === "login" ? "Sign In" : "Create Account"}
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
+                  {mode === "login" ? "Sign In" : "Create Account"}
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </motion.button>
               </form>
 

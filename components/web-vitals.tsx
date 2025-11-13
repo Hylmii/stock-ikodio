@@ -4,7 +4,7 @@ import { useReportWebVitals } from "next/web-vitals";
 import { trackWebVitals } from "@/utils/performance";
 
 export function WebVitals() {
-  useReportWebVitals((metric) => {
+  useReportWebVitals(metric => {
     trackWebVitals(metric);
   });
 

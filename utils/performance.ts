@@ -1,12 +1,12 @@
 /**
  * Performance Monitoring Utility
- * 
+ *
  * Track and measure performance metrics for IKODIO platform
  */
 
 export class PerformanceMonitor {
   private metrics: Map<string, number[]>;
-  
+
   constructor() {
     this.metrics = new Map();
   }
@@ -16,7 +16,7 @@ export class PerformanceMonitor {
    */
   start(operation: string): () => void {
     const startTime = performance.now();
-    
+
     return () => {
       const duration = performance.now() - startTime;
       this.record(operation, duration);
@@ -31,10 +31,10 @@ export class PerformanceMonitor {
     if (!this.metrics.has(operation)) {
       this.metrics.set(operation, []);
     }
-    
+
     const values = this.metrics.get(operation)!;
     values.push(duration);
-    
+
     // Keep only last 100 measurements
     if (values.length > 100) {
       values.shift();
@@ -52,7 +52,7 @@ export class PerformanceMonitor {
 
     const sorted = [...values].sort((a, b) => a - b);
     const sum = values.reduce((a, b) => a + b, 0);
-    
+
     return {
       count: values.length,
       min: sorted[0],
@@ -69,11 +69,11 @@ export class PerformanceMonitor {
    */
   getAllStats() {
     const stats: Record<string, any> = {};
-    
+
     for (const [operation, _] of this.metrics) {
       stats[operation] = this.getStats(operation);
     }
-    
+
     return stats;
   }
 
@@ -104,7 +104,9 @@ export function measurePerformance(operationName: string) {
       try {
         const result = await originalMethod.apply(this, args);
         const duration = end();
-        console.log(`[Perf] ${operationName}.${propertyKey}: ${duration.toFixed(2)}ms`);
+        console.log(
+          `[Perf] ${operationName}.${propertyKey}: ${duration.toFixed(2)}ms`
+        );
         return result;
       } catch (error) {
         end();
@@ -121,14 +123,14 @@ export function measurePerformance(operationName: string) {
  */
 export function trackWebVitals(metric: any) {
   const { name, value, id } = metric;
-  
+
   // Log to console in development
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.log(`[Web Vital] ${name}:`, value);
   }
-  
+
   // Send to analytics in production
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     // You can send this to your analytics service
     // Example: gtag('event', name, { value, metric_id: id });
   }

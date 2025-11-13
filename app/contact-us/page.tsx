@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, MapPin, Send, Clock, MessageCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  Clock,
+  MessageCircle,
+} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact Us - IKODIO",
-  description: "Get in touch with IKODIO - We're here to help with your questions",
+  description:
+    "Get in touch with IKODIO - We're here to help with your questions",
 };
 
 export default function ContactUsPage() {
@@ -30,7 +39,8 @@ export default function ContactUsPage() {
             Get in Touch
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-            Have questions about IKODIO? We're here to help. Reach out to our team and we'll get back to you as soon as possible.
+            Have questions about IKODIO? We're here to help. Reach out to our
+            team and we'll get back to you as soon as possible.
           </p>
         </div>
 
@@ -86,7 +96,9 @@ export default function ContactUsPage() {
                     <Clock className="w-6 h-6 text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold mb-1">Business Hours</h3>
+                    <h3 className="text-white font-semibold mb-1">
+                      Business Hours
+                    </h3>
                     <div className="text-zinc-400 space-y-1">
                       <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
                       <p>Saturday: 9:00 AM - 1:00 PM</p>
@@ -151,7 +163,8 @@ export default function ContactUsPage() {
                 Need Immediate Assistance?
               </h3>
               <p className="text-zinc-400 text-sm mb-4">
-                For urgent matters during business hours, please call us directly. Our support team is ready to assist you.
+                For urgent matters during business hours, please call us
+                directly. Our support team is ready to assist you.
               </p>
               <a
                 href="tel:+6281112852 32"
@@ -171,7 +184,10 @@ export default function ContactUsPage() {
             <form className="space-y-6">
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-zinc-300 mb-2"
+                >
                   Full Name *
                 </label>
                 <input
@@ -186,7 +202,10 @@ export default function ContactUsPage() {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-zinc-300 mb-2"
+                >
                   Email Address *
                 </label>
                 <input
@@ -201,7 +220,10 @@ export default function ContactUsPage() {
 
               {/* Phone */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-zinc-300 mb-2"
+                >
                   Phone Number
                 </label>
                 <input
@@ -215,7 +237,10 @@ export default function ContactUsPage() {
 
               {/* Subject */}
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label
+                  htmlFor="subject"
+                  className="block text-sm font-medium text-zinc-300 mb-2"
+                >
                   Subject *
                 </label>
                 <select
@@ -235,7 +260,10 @@ export default function ContactUsPage() {
 
               {/* Message */}
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-zinc-300 mb-2">
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-medium text-zinc-300 mb-2"
+                >
                   Message *
                 </label>
                 <textarea
@@ -259,11 +287,17 @@ export default function ContactUsPage() {
                 />
                 <label htmlFor="privacy" className="text-sm text-zinc-400">
                   I agree to the{" "}
-                  <Link href="/privacy-policy" className="text-blue-400 hover:text-blue-300 underline">
+                  <Link
+                    href="/privacy-policy"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
                     Privacy Policy
                   </Link>{" "}
                   and{" "}
-                  <Link href="/terms-and-conditions" className="text-blue-400 hover:text-blue-300 underline">
+                  <Link
+                    href="/terms-and-conditions"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
                     Terms and Conditions
                   </Link>
                 </label>
@@ -291,69 +325,97 @@ export default function ContactUsPage() {
             <h2 className="text-3xl font-bold text-white mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-zinc-400">
-              Quick answers to common questions
-            </p>
+            <p className="text-zinc-400">Quick answers to common questions</p>
           </div>
 
           <div className="space-y-4">
             <details className="group p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <summary className="cursor-pointer text-white font-semibold flex items-center justify-between">
                 How do I get started with IKODIO?
-                <span className="text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-zinc-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </summary>
               <p className="mt-4 text-zinc-400 leading-relaxed">
-                Simply sign up for an account, complete the KYC verification process, choose your subscription plan, and start exploring our AI-powered stock predictions. We offer a free trial for new users to test our platform.
+                Simply sign up for an account, complete the KYC verification
+                process, choose your subscription plan, and start exploring our
+                AI-powered stock predictions. We offer a free trial for new
+                users to test our platform.
               </p>
             </details>
 
             <details className="group p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <summary className="cursor-pointer text-white font-semibold flex items-center justify-between">
                 What payment methods do you accept?
-                <span className="text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-zinc-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </summary>
               <p className="mt-4 text-zinc-400 leading-relaxed">
-                We accept major credit cards (Visa, Mastercard, JCB), Indonesian bank transfers, e-wallets (GoPay, OVO, DANA), and other local payment methods through our secure payment processors.
+                We accept major credit cards (Visa, Mastercard, JCB), Indonesian
+                bank transfers, e-wallets (GoPay, OVO, DANA), and other local
+                payment methods through our secure payment processors.
               </p>
             </details>
 
             <details className="group p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <summary className="cursor-pointer text-white font-semibold flex items-center justify-between">
                 Is my data secure with IKODIO?
-                <span className="text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-zinc-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </summary>
               <p className="mt-4 text-zinc-400 leading-relaxed">
-                Yes, we implement industry-standard security measures including SSL/TLS encryption, secure authentication, and comply with Indonesian data protection laws (UU PDP). Your financial data and personal information are protected with bank-level security.
+                Yes, we implement industry-standard security measures including
+                SSL/TLS encryption, secure authentication, and comply with
+                Indonesian data protection laws (UU PDP). Your financial data
+                and personal information are protected with bank-level security.
               </p>
             </details>
 
             <details className="group p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <summary className="cursor-pointer text-white font-semibold flex items-center justify-between">
                 Can I cancel my subscription anytime?
-                <span className="text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-zinc-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </summary>
               <p className="mt-4 text-zinc-400 leading-relaxed">
-                Yes, you can cancel your subscription at any time through your account settings. You'll retain access to paid features until the end of your current billing period. No refunds are provided for partial months.
+                Yes, you can cancel your subscription at any time through your
+                account settings. You'll retain access to paid features until
+                the end of your current billing period. No refunds are provided
+                for partial months.
               </p>
             </details>
 
             <details className="group p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <summary className="cursor-pointer text-white font-semibold flex items-center justify-between">
                 Do you provide investment advice?
-                <span className="text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-zinc-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </summary>
               <p className="mt-4 text-zinc-400 leading-relaxed">
-                No, IKODIO provides AI-powered predictions and analytics tools for informational purposes only. We do not provide financial advice or investment recommendations. All investment decisions are your responsibility, and we recommend consulting with licensed financial advisors.
+                No, IKODIO provides AI-powered predictions and analytics tools
+                for informational purposes only. We do not provide financial
+                advice or investment recommendations. All investment decisions
+                are your responsibility, and we recommend consulting with
+                licensed financial advisors.
               </p>
             </details>
 
             <details className="group p-6 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <summary className="cursor-pointer text-white font-semibold flex items-center justify-between">
                 What stocks does IKODIO cover?
-                <span className="text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-zinc-500 group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </summary>
               <p className="mt-4 text-zinc-400 leading-relaxed">
-                Currently, IKODIO focuses on Indonesian bluechip stocks listed on the Indonesia Stock Exchange (IDX), including major banks, telecommunications, automotive, and consumer goods companies. We're continuously expanding our coverage.
+                Currently, IKODIO focuses on Indonesian bluechip stocks listed
+                on the Indonesia Stock Exchange (IDX), including major banks,
+                telecommunications, automotive, and consumer goods companies.
+                We're continuously expanding our coverage.
               </p>
             </details>
           </div>

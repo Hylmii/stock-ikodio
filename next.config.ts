@@ -7,21 +7,24 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  
+
   // Performance Optimizations
   compiler: {
     // Remove console.log in production
-    removeConsole: process.env.NODE_ENV === "production" ? {
-      exclude: ["error", "warn"],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"],
+          }
+        : false,
   },
-  
+
   // Compression
   compress: true,
-  
+
   // Power optimization
   poweredByHeader: false,
-  
+
   // Optimize images
   images: {
     formats: ["image/avif", "image/webp"],
@@ -32,7 +35,7 @@ const nextConfig: NextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
+
   // Experimental features for better performance
   experimental: {
     // Optimize package imports
@@ -41,11 +44,11 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-icons",
       "framer-motion",
     ],
-    
+
     // Enable automatic static optimization
     optimizeCss: true,
   },
-  
+
   // Headers for caching and security
   async headers() {
     return [
@@ -75,7 +78,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=60, s-maxage=60, stale-while-revalidate=300",
+            value:
+              "public, max-age=60, s-maxage=60, stale-while-revalidate=300",
           },
         ],
       },

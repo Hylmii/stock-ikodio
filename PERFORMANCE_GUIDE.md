@@ -11,12 +11,14 @@ IKODIO has been optimized for maximum performance across all layers of the stack
 **Location**: `/lib/cache/memory-cache.ts`
 
 **Benefits**:
+
 - **50-100x faster** response time for cached predictions
 - **< 1ms** lookup time vs 500-2000ms API calls
 - **Significant cost savings** on external API calls (Gemini AI, Finnhub, etc.)
 - **Automatic cleanup** of expired entries
 
 **Cache TTL by Interval**:
+
 ```typescript
 {
   '1m': 30s,   // Very short-term
@@ -29,6 +31,7 @@ IKODIO has been optimized for maximum performance across all layers of the stack
 ```
 
 **Usage**:
+
 ```bash
 # Cache hit (ultra-fast)
 curl -X POST /api/workflow-prediction \
@@ -48,12 +51,14 @@ curl -X POST /api/workflow-prediction \
 **Location**: `/utils/performance.ts` & `/app/api/performance/route.ts`
 
 **Features**:
+
 - Real-time performance tracking
 - Statistical analysis (min, max, mean, median, p95, p99)
 - Memory usage monitoring
 - Cache utilization metrics
 
 **Check Performance Metrics**:
+
 ```bash
 # Get all performance stats
 curl https://ikodio.com/api/performance
@@ -90,6 +95,7 @@ curl https://ikodio.com/api/performance
 **Location**: `/next.config.ts`
 
 **Improvements**:
+
 - ✅ **Compression enabled** (gzip/brotli)
 - ✅ **Console.log removal** in production
 - ✅ **Image optimization** (AVIF, WebP)
@@ -98,6 +104,7 @@ curl https://ikodio.com/api/performance
 - ✅ **API response caching** (60s with stale-while-revalidate)
 
 **Headers Added**:
+
 ```
 X-DNS-Prefetch-Control: on
 X-Frame-Options: SAMEORIGIN
@@ -110,6 +117,7 @@ Cache-Control: public, max-age=31536000, immutable (for static assets)
 **Location**: `/components/web-vitals.tsx`
 
 **Tracks**:
+
 - **LCP** (Largest Contentful Paint) - Target: < 2.5s
 - **FID** (First Input Delay) - Target: < 100ms
 - **CLS** (Cumulative Layout Shift) - Target: < 0.1
@@ -121,12 +129,14 @@ Cache-Control: public, max-age=31536000, immutable (for static assets)
 **Location**: `/app/api/workflow-prediction/route.ts`
 
 **Combined Benefits**:
+
 - Workflow DevKit reliability (auto-retry)
 - Memory cache speed (ultra-fast hits)
 - Smart TTL management
 - Response headers indicate cache status
 
 **Response Headers**:
+
 ```
 X-Cache: HIT | MISS
 X-Cache-Age: 45 (seconds)
@@ -169,17 +179,18 @@ Memory Usage: Monitored real-time
 
 ## Impact Summary
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
+| Metric                | Before  | After                    | Improvement         |
+| --------------------- | ------- | ------------------------ | ------------------- |
 | **Avg Response Time** | 1,500ms | 1ms (hit) / 687ms (miss) | **50-1500x faster** |
-| **Success Rate** | 85% | 98% | **+13%** |
-| **API Costs** | 100% | ~30% (70% from cache) | **-70%** |
-| **User Satisfaction** | 😐 | 😊 | **Much better** |
-| **Monitoring** | None | Real-time | **Full visibility** |
+| **Success Rate**      | 85%     | 98%                      | **+13%**            |
+| **API Costs**         | 100%    | ~30% (70% from cache)    | **-70%**            |
+| **User Satisfaction** | 😐      | 😊                       | **Much better**     |
+| **Monitoring**        | None    | Real-time                | **Full visibility** |
 
 ## Usage Examples
 
 ### 1. Normal Prediction (with cache)
+
 ```bash
 curl -X POST https://ikodio.com/api/workflow-prediction \
   -H "Content-Type: application/json" \
@@ -190,6 +201,7 @@ curl -X POST https://ikodio.com/api/workflow-prediction \
 **Subsequent requests**: ~1ms (cache hit) ⚡
 
 ### 2. Force Fresh Data
+
 ```bash
 curl -X POST https://ikodio.com/api/workflow-prediction \
   -H "Content-Type: application/json" \
@@ -199,6 +211,7 @@ curl -X POST https://ikodio.com/api/workflow-prediction \
 **Always**: ~687ms (cache bypassed)
 
 ### 3. Monitor Performance
+
 ```bash
 # View metrics
 curl https://ikodio.com/api/performance
@@ -212,6 +225,7 @@ curl -X DELETE https://ikodio.com/api/performance
 ### For Frontend Developers
 
 1. **Always check cache status**:
+
 ```typescript
 const response = await fetch('/api/workflow-prediction', {...});
 const data = await response.json();
@@ -222,18 +236,20 @@ if (data.cached) {
 ```
 
 2. **Use bypass cache sparingly**:
+
 ```typescript
 // Only when user explicitly requests fresh data
-const fresh = await fetch('/api/workflow-prediction', {
+const fresh = await fetch("/api/workflow-prediction", {
   body: JSON.stringify({
-    symbol: 'BBCA',
-    interval: '1h',
+    symbol: "BBCA",
+    interval: "1h",
     bypassCache: userRequestedFresh, // Only when needed!
-  })
+  }),
 });
 ```
 
 3. **Monitor Web Vitals**:
+
 - Check browser console for performance metrics
 - Optimize images and lazy-load components
 - Use Next.js Image component
@@ -241,6 +257,7 @@ const fresh = await fetch('/api/workflow-prediction', {
 ### For Backend Developers
 
 1. **Leverage cache for expensive operations**:
+
 ```typescript
 // Good
 const cached = predictionCache.get(key);
@@ -252,13 +269,15 @@ return result;
 ```
 
 2. **Monitor performance regularly**:
+
 ```typescript
-const end = perfMonitor.start('operation-name');
+const end = perfMonitor.start("operation-name");
 await doWork();
 const duration = end();
 ```
 
 3. **Tune cache TTL based on data freshness requirements**:
+
 ```typescript
 // Real-time data: 30s
 // Near real-time: 2-5min
@@ -276,16 +295,19 @@ const duration = end();
 ## Troubleshooting
 
 ### High Response Times
+
 1. Check if cache is being used (`X-Cache: HIT`)
 2. Monitor `/api/performance` for bottlenecks
 3. Check external API status (Finnhub, Yahoo, Gemini)
 
 ### Low Cache Hit Rate
+
 1. Ensure cache TTL is appropriate
 2. Check if users are bypassing cache
 3. Verify cache size is sufficient
 
 ### Memory Issues
+
 1. Monitor `/api/performance` memory stats
 2. Adjust cache maxSize if needed
 3. Check for memory leaks in long-running processes

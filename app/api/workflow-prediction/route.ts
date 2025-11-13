@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stockPredictionWorkflow } from "@/workflows/stock-prediction-workflow";
-import { 
-  predictionCache, 
-  generatePredictionCacheKey, 
-  CACHE_TTL 
+import {
+  predictionCache,
+  generatePredictionCacheKey,
+  CACHE_TTL,
 } from "@/cache/memory-cache";
 
 /**
  * Workflow-based Multi-Modal Prediction API (with Caching)
- * 
+ *
  * This endpoint uses:
  * - Workflow DevKit for reliability and auto-retry
  * - In-memory cache for ultra-fast responses
  * - Smart TTL based on prediction interval
- * 
+ *
  * Performance improvements:
  * - Cache hit: ~1ms (50-100x faster!)
  * - Cache miss: Normal workflow execution
@@ -22,7 +22,7 @@ import {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     const body = await request.json();
     const { symbol, interval, bypassCache = false } = body;
@@ -36,9 +36,14 @@ export async function POST(request: NextRequest) {
     if (!bypassCache) {
       const cachedResult = predictionCache.get(cacheKey);
       if (cachedResult) {
-        const cacheAge = Date.now() - new Date(cachedResult.timestamp).getTime();
-        console.log(`[Cache] HIT for ${symbol} @ ${interval} (age: ${(cacheAge / 1000).toFixed(1)}s)`);
-        
+        const cacheAge =
+          Date.now() - new Date(cachedResult.timestamp).getTime();
+        console.log(
+          `[Cache] HIT for ${symbol} @ ${interval} (age: ${(
+            cacheAge / 1000
+          ).toFixed(1)}s)`
+        );
+
         return NextResponse.json(
           {
             ...cachedResult,
@@ -83,7 +88,6 @@ export async function POST(request: NextRequest) {
         },
       }
     );
-
   } catch (error: any) {
     console.error("[Workflow API] Error:", error);
 
